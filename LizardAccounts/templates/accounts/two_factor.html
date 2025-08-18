@@ -1,0 +1,50 @@
+{% extends 'accounts/main.html' %}
+{% block content %}
+<h2>Multi-Factor Authentication Setup</h2>
+<p>Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):</p>
+<img src="{{ qr_url }}" alt="TOTP QR Code" width="200" height="200">
+{% if not mfa_verified %}
+    <form method="post">
+        {% csrf_token %}
+        <label for="code">Enter the 6-digit code from your app:</label>
+        <input type="text" name="code" id="code" required>
+        <button type="submit">Verify MFA</button>
+    </form>
+{% else %}
+    <div id="approval-status">
+        {% if is_approved %}
+            <p style="color:green; font-weight:bold;">Your account has been approved! <a href="{% url 'login' %}">Login now</a>.</p>
+        {% else %}
+            <p style="color:green; font-weight:bold;">MFA setup complete! Your account is now awaiting admin/manager approval.</p>
+            <p>You will be able to log in once your account is approved.</p>
+        {% endif %}
+    </div>
+    <script>
+        {% if not is_approved %}
+        let pollCount = 0;
+        let pollInterval = 5000;
+        let maxPolls = 24; // 2 MINUTES
+
+        function pollApproval() {
+            pollCount++;
+            fetch(window.location.href, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const status = doc.getElementById('approval-status').innerHTML;
+                    document.getElementById('approval-status').innerHTML = status;
+                    if (status.includes('approved')) {
+                        window.location.reload();
+                    } else if (pollCount < maxPolls) {
+                        // 6 POLLS -> INCREASE INTERVAL
+                        if (pollCount % 6 === 0) pollInterval *= 2;
+                        setTimeout(pollApproval, pollInterval);
+                    }
+                });
+        }
+        setTimeout(pollApproval, pollInterval);
+        {% endif %}
+    </script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'accounts/main.html' %}
+{% block content %}
+<h2>User Management</h2>
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% if mfa_required %}
+    <form method="post">
+        {% csrf_token %}
+        <label for="mfa_code">Enter your MFA code to manage users:</label>
+        <input type="text" name="mfa_code" id="mfa_code" required>
+        <button type="submit">Verify MFA</button>
+    </form>
+{% else %}
+    <h3>Pending Users</h3>
+    <ul>
+        {% for lizard in pending %}
+            <li>
+                {{ lizard.user.username }} ({{ lizard.role }})
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="lizard_id" value="{{ lizard.id }}">
+                    <input type="hidden" name="action" value="approve">
+                    <button type="submit">Approve</button>
+                </form>
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="lizard_id" value="{{ lizard.id }}">
+                    <input type="hidden" name="action" value="revoke">
+                    <button type="submit">Revoke</button>
+                </form>
+            </li>
+        {% empty %}
+            <li>No pending users.</li>
+        {% endfor %}
+    </ul>
+    <h3>All Users</h3>
+    <ul>
+        {% for lizard in users %}
+            <li>
+                {{ lizard.user.username }} ({{ lizard.role }})
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="lizard_id" value="{{ lizard.id }}">
+                    <input type="hidden" name="action" value="role">
+                    <select name="role">
+                        {% for key, value in lizard.ROLE_CHOICES %}
+                            <option value="{{ key }}" {% if lizard.role == key %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Change Role</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

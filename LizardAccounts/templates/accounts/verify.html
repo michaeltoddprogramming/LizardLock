@@ -1,0 +1,10 @@
+{% extends 'accounts/main.html' %}
+{% block content %}
+<h2>MFA Verification</h2>
+<form method="post">
+    {% csrf_token %}
+    <label for="code">Enter MFA code:</label>
+    <input type="text" name="code" id="code" required>
+    <button type="submit">Verify</button>
+</form>
+{% endblock %}
