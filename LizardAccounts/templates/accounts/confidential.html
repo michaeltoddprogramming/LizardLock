@@ -1,0 +1,58 @@
+{% extends 'accounts/main.html' %}
+{% block content %}
+<h2>Confidential Files</h2>
+{% if error %}
+    <div style="color:red;">{{ error }}</div>
+{% endif %}
+
+<!-- Create Confidential File -->
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="create">
+    <label for="name">File Name:</label>
+    <input type="text" name="name" id="name" required>
+    <label for="content">Confidential Content:</label>
+    <textarea name="content" id="content" rows="4" cols="50" required></textarea>
+    <button type="submit">Create Confidential File</button>
+</form>
+
+<hr>
+
+<ul>
+    {% for conf in files %}
+        <li>
+            <b>{{ conf.name }}</b> ({{ conf.size }} bytes, uploaded {{ conf.uploaded_at|date:"Y-m-d H:i" }})
+            <!-- Edit Confidential File -->
+            <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="write">
+                <input type="hidden" name="id" value="{{ conf.id }}">
+                <label for="content_{{ conf.id }}">Edit Content:</label>
+                <textarea name="content" id="content_{{ conf.id }}" rows="2" cols="40"></textarea>
+                <button type="submit">Update</button>
+            </form>
+            <!-- View Confidential File (inline, no download) -->
+            <form method="get" style="display:inline;">
+                <input type="hidden" name="action" value="read">
+                <input type="hidden" name="id" value="{{ conf.id }}">
+                <button type="submit">View</button>
+            </form>
+            <!-- Delete -->
+            <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="{{ conf.id }}">
+                <button type="submit" onclick="return confirm('Delete this confidential file?')">Delete</button>
+            </form>
+        </li>
+    {% empty %}
+        <li>No confidential files.</li>
+    {% endfor %}
+</ul>
+
+{% if view_content %}
+    <hr>
+    <h3>Viewing: {{ view_name }}</h3>
+    <pre style="background:#eee; padding:1em;">{{ view_content }}</pre>
+{% endif %}
+{% endblock %}

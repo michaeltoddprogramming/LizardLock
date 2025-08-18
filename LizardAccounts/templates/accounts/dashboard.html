@@ -1,4 +1,24 @@
-{% extends 'accounts/main.html'%}
+{% extends 'accounts/main.html' %}
 {% block content %}
-<h1>HOME</h1>
+<h2>Welcome, {{ user.username }}!</h2>
+<p>Your role: <b>{{ role|capfirst }}</b></p>
+
+<ul>
+    {% if 'images' in user_permissions and 'list' in user_permissions.images %}
+        <li><a href="{% url 'images' %}">Manage Images</a></li>
+    {% endif %}
+    {% if 'documents' in user_permissions and 'list' in user_permissions.documents %}
+        <li><a href="{% url 'documents' %}">Manage Documents</a></li>
+    {% endif %}
+    {% if 'confidential' in user_permissions and 'list' in user_permissions.confidential %}
+        <li><a href="{% url 'confidential' %}">Manage Confidential Files</a></li>
+    {% endif %}
+    {% if role == 'admin' or role == 'manager' %}
+        <li><a href="{% url 'manage' %}">User Management</a></li>
+    {% endif %}
+</ul>
+
+{% if not mfa_verified %}
+    <p><b>MFA not verified for sensitive actions.</b></p>
+{% endif %}
 {% endblock %}
