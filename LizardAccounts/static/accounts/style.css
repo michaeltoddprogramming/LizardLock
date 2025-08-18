@@ -1,0 +1,69 @@
+body {
+    background: linear-gradient(135deg, #b6e388 0%, #5cdb95 100%);
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    color: #355c2d;
+}
+.navbar {
+    background: #379634;
+    padding: 1em;
+    border-radius: 0 0 20px 20px;
+    text-align: center;
+}
+.navbar h1 {
+    font-size: 2em;
+    margin: 0;
+    letter-spacing: 2px;
+    color: #e9f5db;
+    text-shadow: 1px 1px 2px #355c2d55;
+}
+.container {
+    max-width: 500px;
+    margin: 2em auto;
+    background: #e9f5db; /* solid background for readability */
+    border-radius: 20px;
+    box-shadow: 0 0 10px #37963455;
+    padding: 2em;
+}
+button {
+    background: #379634;
+    color: #e9f5db;
+    border: none;
+    padding: 0.5em 2em;
+    border-radius: 10px;
+    font-size: 1em;
+    cursor: pointer;
+    box-shadow: 0 2px 4px #355c2d33;
+}
+button:hover {
+    background: #355c2d;
+    color: #b6e388;
+}
+.footer {
+    text-align: center;
+    margin-top: 2em;
+    color: #379634;
+}
+
+.navbar-links {
+    margin-top: 1em;
+}
+.navbar-links a {
+    margin-right: 1em;
+    color: #e9f5db;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 0.3em 1em;
+    border-radius: 5px;
+    background: #379634;
+    transition: background 0.2s, color 0.2s;
+}
+.navbar-links a:last-child {
+    margin-right: 0;
+}
+.navbar-links a:hover {
+    background: #355c2d;
+    color: #b6e388;
+}
+.navbar-subtitle {
+    font-size: 1.2em;
+}

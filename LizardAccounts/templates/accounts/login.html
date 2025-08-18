@@ -1,6 +1,7 @@
 {% extends 'accounts/main.html' %}
 {% block content %}
-<h2>Login</h2>
+<h2>Lizard Login</h2>
+<p>Enter your credentials to slither into the fortress.</p>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
