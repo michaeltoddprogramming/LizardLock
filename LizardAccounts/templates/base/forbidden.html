@@ -1,0 +1,14 @@
+{% extends 'base/main.html' %}
+{% block content %}
+<h2>Access Denied</h2>
+<p>You do not have permission to view this page right now.</p>
+{% if error %}
+    <div style="color:red; font-weight:bold;">Reason: {{ error }}</div>
+{% endif %}
+<ul>
+    <li>If you believe this is a mistake, please contact an administrator.</li>
+    <li>If you need access, ensure you are logged in and have completed MFA verification.</li>
+    <li><a href="{% url 'dashboard' %}">Return to Dashboard</a></li>
+    <li><a href="{% url 'login' %}">Login</a></li>
+</ul>
+{% endblock %}

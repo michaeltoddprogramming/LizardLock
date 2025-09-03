@@ -33,7 +33,7 @@ class AssetAccessLog(models.Model):
         ]
 
 def log_asset_access(user, asset_type, asset_name, operation, request, success, mfa_verified):
-    # Improved IP detection for proxies/load balancers
+
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
         ip = x_forwarded_for.split(',')[0].strip()
@@ -52,8 +52,7 @@ def log_asset_access(user, asset_type, asset_name, operation, request, success, 
     )
 
 class ImageAsset(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    file = models.ImageField(upload_to='')
+    file = models.ImageField(upload_to='images/')
     name = models.CharField(max_length=255)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     sha256 = models.CharField(max_length=64, blank=True)
@@ -77,7 +76,6 @@ class ImageAsset(models.Model):
         return current_hash == self.sha256
 
 class DocumentAsset(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     file = models.FileField(upload_to='documents/')
     name = models.CharField(max_length=255)
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -102,7 +100,6 @@ class DocumentAsset(models.Model):
         return current_hash == self.sha256
 
 class ConfidentialAsset(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     encrypted_file = models.FileField(upload_to='confidential/')
     name = models.CharField(max_length=255)
     uploaded_at = models.DateTimeField(auto_now_add=True)

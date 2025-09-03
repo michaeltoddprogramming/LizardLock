@@ -1,0 +1,135 @@
+{% extends 'base/main.html' %}
+{% load static %}
+{% block head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'accounts.css' %}">
+{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="bento-card welcome">
+        <h2><i class="fas fa-shield-alt"></i> MFA Verification</h2>
+        <p>Enter your 6-digit authentication code to complete login.</p>
+    </div>
+
+    <div class="bento-card login-form">
+        <h3><i class="fas fa-key"></i> Authentication Code</h3>
+
+        {% if messages %}
+        <div class="error-messages">
+            {% for message in messages %}
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i> {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if rate_limited %}
+        <div class="rate-limit-notice">
+            <i class="fas fa-clock"></i>
+            <p>Too many attempts. Please wait before trying again.</p>
+        </div>
+        {% else %}
+        <form method="post" id="mfa-form">
+            {% csrf_token %}
+            <input type="hidden" name="code" id="code" value="">
+
+            <div class="form-group">
+                <label>Enter 6-digit code:</label>
+                <div class="mfa-input-container">
+                    <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="0">
+                    <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="1">
+                    <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="2">
+                    <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="3">
+                    <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="4">
+                    <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="5">
+                </div>
+                <div class="form-hint">
+                    <i class="fas fa-lightbulb"></i>
+                    Enter the 6-digit code from your authenticator app
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn">
+                <i class="fas fa-check"></i> Verify Code
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="bento-card register-link">
+        <h4><i class="fas fa-info-circle"></i> Need Help?</h4>
+        <p>Codes expire after 30 seconds. Make sure to enter them quickly.</p>
+        <a href="{% url 'login' %}" class="register-link-btn">
+            <i class="fas fa-arrow-left"></i> Back to Login
+        </a>
+    </div>
+</div>
+
+<script>
+    const mfaDigits = document.querySelectorAll('.mfa-digit');
+    const hiddenCodeInput = document.getElementById('code');
+    const mfaForm = document.getElementById('mfa-form');
+
+    function updateHiddenInput() {
+        const code = Array.from(mfaDigits).map(input => input.value).join('');
+        hiddenCodeInput.value = code;
+
+        mfaDigits.forEach((input, index) => {
+            if (input.value) {
+                input.classList.add('filled');
+            } else {
+                input.classList.remove('filled');
+            }
+        });
+
+        if (code.length === 6) {
+            setTimeout(() => {
+                mfaForm.submit();
+            }, 500);
+        }
+    }
+
+    mfaDigits.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            if (!/^\d$/.test(e.target.value)) {
+                e.target.value = '';
+                return;
+            }
+
+            if (e.target.value && index < 5) {
+                mfaDigits[index + 1].focus();
+            }
+
+            updateHiddenInput();
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                mfaDigits[index - 1].focus();
+            }
+        });
+
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const paste = e.clipboardData.getData('text');
+            const digits = paste.replace(/\D/g, '').slice(0, 6);
+
+            digits.split('').forEach((digit, i) => {
+                if (mfaDigits[i]) {
+                    mfaDigits[i].value = digit;
+                }
+            });
+
+            updateHiddenInput();
+
+            const lastIndex = Math.min(digits.length, 5);
+            mfaDigits[lastIndex].focus();
+        });
+    });
+
+    if (mfaDigits.length > 0) {
+        mfaDigits[0].focus();
+    }
+</script>
+{% endblock %}
