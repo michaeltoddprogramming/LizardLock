@@ -1,0 +1,135 @@
+{% extends 'base/main.html' %}
+{% load static %}
+{% block head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'dashboard.css' %}">
+{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+
+    <div class="bento-card welcome">
+        <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+        <p>Welcome back, {{ user.username }}! Access your secure file management system with confidence.</p>
+        <div class="role-badge">{{ role|capfirst }}</div>
+    </div>
+
+
+    <div class="bento-card quick-actions">
+        <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+        <div class="action-grid">
+            {% if 'images' in user_permissions and 'list' in user_permissions.images %}
+                <a href="{% url 'images' %}" class="action-item">
+                    <div class="action-icon"><i class="fas fa-images"></i></div>
+                    <div class="action-content">
+                        <h4>Images</h4>
+                        <p>Manage your image files</p>
+                    </div>
+                </a>
+            {% endif %}
+            {% if 'documents' in user_permissions and 'list' in user_permissions.documents %}
+                <a href="{% url 'documents' %}" class="action-item">
+                    <div class="action-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="action-content">
+                        <h4>Documents</h4>
+                        <p>Access your documents</p>
+                    </div>
+                </a>
+            {% endif %}
+            {% if 'confidential' in user_permissions and 'list' in user_permissions.confidential %}
+                <a href="{% url 'confidential' %}" class="action-item">
+                    <div class="action-icon"><i class="fas fa-lock"></i></div>
+                    <div class="action-content">
+                        <h4>Confidential</h4>
+                        <p>Secure sensitive files</p>
+                    </div>
+                </a>
+            {% endif %}
+            {% if role == 'admin' or role == 'manager' %}
+                <a href="{% url 'manage' %}" class="action-item">
+                    <div class="action-icon"><i class="fas fa-users-cog"></i></div>
+                    <div class="action-content">
+                        <h4>User Management</h4>
+                        <p>Manage system users</p>
+                    </div>
+                </a>
+            {% endif %}
+            {% if role == 'admin' %}
+                <a href="{% url 'analytics' %}" class="action-item">
+                    <div class="action-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="action-content">
+                        <h4>Analytics</h4>
+                        <p>View system insights</p>
+                    </div>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <div class="bento-card security">
+        <h3><i class="fas fa-shield-alt"></i> Security Status</h3>
+        {% if not mfa_verified %}
+            <div class="mfa-status unverified">
+                <div class="status-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <strong>MFA Not Verified</strong>
+                <p>Enable two-factor authentication for enhanced security</p>
+            </div>
+        {% else %}
+            <div class="mfa-status verified">
+                <div class="status-icon"><i class="fas fa-check-circle"></i></div>
+                <strong>MFA Verified</strong>
+                <p>Your account is fully secured</p>
+            </div>
+        {% endif %}
+    </div>
+
+
+    {% if role == 'admin' %}
+    <div class="bento-card stats">
+        <h3><i class="fas fa-chart-line"></i> System Overview</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-label">Users</div>
+                <div class="stat-number">{{ user_count|default:"42" }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-folder"></i></div>
+                <div class="stat-label">Files</div>
+                <div class="stat-number">{{ file_count|default:"156" }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="stat-label">Security</div>
+                <div class="stat-number">100%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-label">Uptime</div>
+                <div class="stat-number">99.9%</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% if recent_activity %}
+    <div class="bento-card activity">
+        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+        <div class="activity-list">
+            {% for activity in recent_activity %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-{{ activity.icon|default:'file' }}"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">{{ activity.title }}</div>
+                    <div class="activity-time">{{ activity.time }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

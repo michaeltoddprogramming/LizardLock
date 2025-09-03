@@ -207,3 +207,6 @@ media/*
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Media files (uploaded content)
+media/*

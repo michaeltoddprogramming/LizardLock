@@ -1,0 +1,201 @@
+{% extends 'base/main.html' %}
+{% load static %}
+{% block head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'accounts.css' %}">
+{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="bento-card welcome">
+        <h2><i class="fas fa-mobile-alt"></i> MFA Setup</h2>
+        <p>Secure your account with two-factor authentication</p>
+    </div>
+
+    {% if not mfa_verified %}
+        <div class="bento-card login-form qr-card">
+            <h3><i class="fas fa-qrcode"></i> Step 1: Scan QR Code</h3>
+            <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)</p>
+            <div class="qr-code-container">
+                <img src="{{ qr_url }}" alt="TOTP QR Code" class="qr-code">
+            </div>
+        </div>
+
+        {% if rate_limited %}
+        <div class="bento-card register-link">
+            <div class="rate-limit-notice">
+                <i class="fas fa-clock"></i>
+                <h4>Too Many Attempts</h4>
+                <p>Please wait before trying again.</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="bento-card login-form">
+            <h3><i class="fas fa-key"></i> Step 2: Verify Code</h3>
+
+            {% if messages %}
+            <div class="error-messages">
+                {% for message in messages %}
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i> {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" id="mfa-form">
+                {% csrf_token %}
+                <input type="hidden" name="code" id="code" value="">
+
+                <div class="form-group">
+                    <label>Enter 6-digit code:</label>
+                    <div class="mfa-input-container">
+                        <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="0">
+                        <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="1">
+                        <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="2">
+                        <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="3">
+                        <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="4">
+                        <input type="text" class="mfa-digit" maxlength="1" pattern="[0-9]" inputmode="numeric" data-index="5">
+                    </div>
+                    <div class="form-hint">
+                        <i class="fas fa-lightbulb"></i>
+                        Enter the 6-digit code from your authenticator app
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-check"></i> Verify & Complete Setup
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+    {% else %}
+        <div class="bento-card login-form">
+            <div id="approval-status">
+                {% if is_approved %}
+                    <div class="success-message">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Account Approved!</h3>
+                        <p>Your account has been approved and is ready to use.</p>
+                        <a href="{% url 'login' %}" class="login-btn">
+                            <i class="fas fa-sign-in-alt"></i> Login Now
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="pending-message">
+                        <i class="fas fa-clock"></i>
+                        <h3>Setup Complete!</h3>
+                        <p>MFA setup is complete. Your account is now awaiting admin/manager approval.</p>
+                        <div class="waiting-indicator">
+                            <div class="spinner"></div>
+                            <p>Checking approval status...</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bento-card register-link">
+            <h4><i class="fas fa-info-circle"></i> What Happens Next?</h4>
+            <p>Your account will be reviewed by an administrator. You'll receive access once approved.</p>
+            <a href="{% url 'register' %}" class="register-link-btn">
+                <i class="fas fa-arrow-left"></i> Back to Registration
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    {% if not mfa_verified %}
+    const mfaDigits = document.querySelectorAll('.mfa-digit');
+    const hiddenCodeInput = document.getElementById('code');
+    const mfaForm = document.getElementById('mfa-form');
+
+    function updateHiddenInput() {
+        const code = Array.from(mfaDigits).map(input => input.value).join('');
+        hiddenCodeInput.value = code;
+
+        mfaDigits.forEach((input, index) => {
+            if (input.value) {
+                input.classList.add('filled');
+            } else {
+                input.classList.remove('filled');
+            }
+        });
+
+        if (code.length === 6) {
+            setTimeout(() => {
+                mfaForm.submit();
+            }, 500);
+        }
+    }
+
+    mfaDigits.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            if (!/^\d$/.test(e.target.value)) {
+                e.target.value = '';
+                return;
+            }
+
+            if (e.target.value && index < 5) {
+                mfaDigits[index + 1].focus();
+            }
+
+            updateHiddenInput();
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                mfaDigits[index - 1].focus();
+            }
+        });
+
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const paste = e.clipboardData.getData('text');
+            const digits = paste.replace(/\D/g, '').slice(0, 6);
+
+            digits.split('').forEach((digit, i) => {
+                if (mfaDigits[i]) {
+                    mfaDigits[i].value = digit;
+                }
+            });
+
+            updateHiddenInput();
+
+            const lastIndex = Math.min(digits.length, 5);
+            mfaDigits[lastIndex].focus();
+        });
+    });
+
+    if (mfaDigits.length > 0) {
+        mfaDigits[0].focus();
+    }
+    {% endif %}
+
+    {% if mfa_verified and not is_approved %}
+    let pollCount = 0;
+    let pollInterval = 5000;
+    let maxPolls = 24;
+
+    function pollApproval() {
+        pollCount++;
+        fetch(window.location.href, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const status = doc.getElementById('approval-status').innerHTML;
+                document.getElementById('approval-status').innerHTML = status;
+                if (status.includes('approved')) {
+                    window.location.reload();
+                } else if (pollCount < maxPolls) {
+                    if (pollCount % 6 === 0) pollInterval *= 2;
+                    setTimeout(pollApproval, pollInterval);
+                }
+            });
+    }
+    setTimeout(pollApproval, pollInterval);
+    {% endif %}
+</script>
+{% endblock %}
