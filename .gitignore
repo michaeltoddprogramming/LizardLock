@@ -193,6 +193,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+media/
+media/*
 
 # Cursor
 #  Cursor is an AI-powered code editor. `.cursorignore` specifies files/directories to
