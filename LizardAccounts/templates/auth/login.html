@@ -1,0 +1,71 @@
+{% extends 'base/main.html' %}
+{% load static %}
+{% block head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'accounts.css' %}">
+{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="bento-card welcome">
+        <h2><i class="fas fa-shield-alt"></i> Lizard Login</h2>
+        <p>Enter your credentials to access the secure fortress.</p>
+    </div>
+
+    <div class="bento-card login-form">
+        <h3><i class="fas fa-sign-in-alt"></i> Sign In</h3>
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="error-messages">
+                {% for error in form.non_field_errors %}
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">
+                    <i class="fas fa-user"></i> Username
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <div class="field-errors">
+                    {% for error in form.username.errors %}
+                    <span class="error-text">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                <div class="field-errors">
+                    {% for error in form.password.errors %}
+                    <span class="error-text">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+    </div>
+
+    <div class="bento-card register-link">
+        <h4><i class="fas fa-user-plus"></i> New to LizardLock?</h4>
+        <p>Join our secure community and protect your digital assets.</p>
+        <a href="{% url 'register' %}" class="register-link-btn">
+            <i class="fas fa-arrow-right"></i> Create Account
+        </a>
+    </div>
+</div>
+{% endblock %}

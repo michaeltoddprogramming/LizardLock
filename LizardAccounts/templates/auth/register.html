@@ -1,0 +1,85 @@
+{% extends 'base/main.html' %}
+{% load static %}
+{% block head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'accounts.css' %}">
+{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="bento-card welcome">
+        <h2><i class="fas fa-user-shield"></i> Become a Lizard Guardian</h2>
+        <p>Join LizardLock Fortress and help us keep your digital assets safe and secure.</p>
+    </div>
+
+    <div class="bento-card register-form">
+        <h3><i class="fas fa-user-plus"></i> Create Account</h3>
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="error-messages">
+                {% for error in form.non_field_errors %}
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">
+                    <i class="fas fa-user"></i> Username
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <div class="field-errors">
+                    {% for error in form.username.errors %}
+                    <span class="error-text">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                <div class="field-errors">
+                    {% for error in form.password1.errors %}
+                    <span class="error-text">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}">
+                    <i class="fas fa-lock"></i> Confirm Password
+                </label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                <div class="field-errors">
+                    {% for error in form.password2.errors %}
+                    <span class="error-text">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="register-btn">
+                <i class="fas fa-user-plus"></i> Register
+            </button>
+        </form>
+    </div>
+
+    <div class="bento-card login-link">
+        <h4><i class="fas fa-sign-in-alt"></i> Already have an account?</h4>
+        <p>Welcome back! Sign in to access your secure fortress.</p>
+        <a href="{% url 'login' %}" class="login-link-btn">
+            <i class="fas fa-arrow-right"></i> Sign In
+        </a>
+    </div>
+</div>
+{% endblock %}

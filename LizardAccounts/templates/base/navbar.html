@@ -1,0 +1,41 @@
+<div class="navbar">
+    <h1>LizardLock</h1>
+    <div class="navbar-subtitle">Welcome to the scales of security</div>
+    <nav class="navbar-links">
+        {% if user.is_authenticated %}
+            <span><i class="fas fa-user"></i> Hi, {{ user.username }}!</span>
+            <a href="{% url 'dashboard' %}"><i class="fas fa-home"></i> Home</a>
+
+            {% if user.lizards %}
+                {% if user.lizards.role == 'admin' or user.lizards.role == 'manager' or user.lizards.role == 'user' %}
+                    <a href="{% url 'images' %}"><i class="fas fa-images"></i> Images</a>
+                {% elif user.lizards.role == 'guest' %}
+                    <a href="{% url 'images' %}"><i class="fas fa-images"></i> Images</a>
+                {% endif %}
+
+                {% if user.lizards.role == 'admin' or user.lizards.role == 'manager' or user.lizards.role == 'user' %}
+                    <a href="{% url 'documents' %}"><i class="fas fa-file-alt"></i> Documents</a>
+                {% endif %}
+
+                {% if user.lizards.role == 'admin' or user.lizards.role == 'manager' or user.lizards.role == 'user' %}
+                    <a href="{% url 'confidential' %}"><i class="fas fa-lock"></i> Confidential</a>
+                {% endif %}
+            {% endif %}
+
+            {% if user.is_authenticated and user.lizards and user.lizards.role in 'admin,manager' %}
+                <a href="{% url 'manage' %}"><i class="fas fa-users-cog"></i> Manage</a>
+            {% endif %}
+            {% if user.is_authenticated and user.lizards and user.lizards.role == 'admin' %}
+                <a href="{% url 'analytics' %}"><i class="fas fa-chart-bar"></i> Analytics</a>
+            {% endif %}
+
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="{% url 'register' %}"><i class="fas fa-user-plus"></i> Register</a>
+        {% endif %}
+    </nav>
+</div>

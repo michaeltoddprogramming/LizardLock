@@ -1,0 +1,113 @@
+{% extends 'base/main.html' %}
+{% load static %}
+{% block head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'analytics.css' %}">
+{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+
+    <div class="bento-card welcome">
+        <h2><i class="fas fa-chart-line"></i> Analytics Dashboard</h2>
+        <p>Monitor system activity, security logs, and performance metrics.</p>
+    </div>
+
+
+    <div class="bento-card stats">
+        <h3><i class="fas fa-tachometer-alt"></i> System Statistics</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">{{ log_count }}</div>
+                <div class="stat-label">Total Logs</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ anomalies|length }}</div>
+                <div class="stat-label">Active Anomalies</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ logs|length }}</div>
+                <div class="stat-label">Recent Activities</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="bento-card logs">
+        <h3><i class="fas fa-history"></i> Recent Activity Logs</h3>
+        {% if logs %}
+        <div class="logs-container">
+            <table class="analytics-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user"></i> User</th>
+                        <th><i class="fas fa-cube"></i> Asset Type</th>
+                        <th><i class="fas fa-file"></i> Asset Name</th>
+                        <th><i class="fas fa-cogs"></i> Operation</th>
+                        <th><i class="fas fa-check-circle"></i> Success</th>
+                        <th><i class="fas fa-shield-alt"></i> MFA</th>
+                        <th><i class="fas fa-globe"></i> IP Address</th>
+                        <th><i class="fas fa-clock"></i> Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr class="{% if not log.success %}error-row{% endif %}">
+                        <td>{{ log.user.username }}</td>
+                        <td><span class="asset-badge {{ log.asset_type|lower }}">{{ log.asset_type }}</span></td>
+                        <td>{{ log.asset_name|truncatechars:20 }}</td>
+                        <td><span class="operation-badge {{ log.operation|lower }}">{{ log.operation }}</span></td>
+                        <td>
+                            {% if log.success %}
+                                <i class="fas fa-check-circle success-icon"></i>
+                            {% else %}
+                                <i class="fas fa-times-circle error-icon"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if log.mfa_verified %}
+                                <i class="fas fa-shield-alt verified-icon"></i>
+                            {% else %}
+                                <i class="fas fa-shield-alt unverified-icon"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ log.ip_address }}</td>
+                        <td>{{ log.timestamp|date:"M j, H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-chart-bar"></i>
+                <p>No activity logs available yet.</p>
+                <p class="empty-subtitle">System activity will appear here as users interact with the platform.</p>
+            </div>
+        {% endif %}
+    </div>
+
+
+    <div class="bento-card anomalies">
+        <h3><i class="fas fa-exclamation-triangle"></i> Security Anomalies</h3>
+        {% if anomalies %}
+        <div class="anomalies-list">
+            {% for anomaly in anomalies %}
+            <div class="anomaly-item {{ anomaly.severity|lower }}">
+                <div class="anomaly-header">
+                    <span class="anomaly-type">{{ anomaly.type }}</span>
+                    <span class="anomaly-severity {{ anomaly.severity|lower }}">{{ anomaly.severity }}</span>
+                </div>
+                <div class="anomaly-description">{{ anomaly.description }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-shield-alt"></i>
+                <p>No anomalies detected.</p>
+                <p class="empty-subtitle">Your system is running securely with no detected issues.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

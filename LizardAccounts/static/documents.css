@@ -1,0 +1,248 @@
+.dashboard-container {
+    max-width: 1200px;
+    margin: 2em auto;
+    padding: 2em;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2em;
+}
+
+.bento-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 2em;
+    box-shadow: 0 8px 32px rgba(55, 150, 52, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.bento-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #379634, #5cdb95, #379634);
+}
+
+.bento-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(55, 150, 52, 0.3);
+}
+
+.bento-card.welcome {
+    grid-column: 1 / -1;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(233, 245, 219, 0.95));
+}
+
+.bento-card.welcome h2 {
+    color: #379634;
+    margin: 0 0 0.5em 0;
+    font-size: 2.5em;
+    text-shadow: 1px 1px 2px rgba(55, 150, 52, 0.2);
+}
+
+.bento-card.welcome h2 i {
+    margin-right: 0.5em;
+    opacity: 0.9;
+}
+
+.bento-card.quick-actions {
+    grid-column: span 2;
+}
+
+.bento-card.quick-actions h3 {
+    color: #379634;
+    margin: 0 0 1em 0;
+    font-size: 1.5em;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.bento-card.quick-actions h3 i {
+    margin-right: 0.5em;
+    opacity: 0.9;
+}
+
+.bento-card.stats {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(200, 230, 201, 0.95));
+    min-height: fit-content;
+}
+
+.bento-card.stats h3 {
+    color: #379634;
+    margin: 0 0 1em 0;
+    font-size: 1.5em;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.bento-card.stats h3 i {
+    margin-right: 0.5em;
+    opacity: 0.9;
+}
+
+.bento-card.security {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 235, 238, 0.95));
+}
+
+.bento-card.security h3 {
+    color: #d32f2f;
+    margin: 0 0 1em 0;
+    font-size: 1.5em;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.bento-card.security h3 i {
+    margin-right: 0.5em;
+    opacity: 0.9;
+}
+
+.document-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+    gap: 1.5em !important;
+    margin-top: 1.5em;
+    width: 100%;
+    justify-items: center;
+}
+
+.document-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 1.2em;
+    box-shadow: 0 4px 15px rgba(55, 150, 52, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(55, 150, 52, 0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 300px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.document-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(55, 150, 52, 0.2);
+}
+
+.document-info h4 {
+    margin: 0 0 0.8em 0;
+    color: #379634;
+    text-align: center;
+    font-size: 1.1em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 0 0.5em;
+}
+
+.document-meta {
+    font-size: 0.9em;
+    color: #666;
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+.document-meta div {
+    margin-bottom: 0.3em;
+}
+
+.document-actions {
+    display: flex;
+    gap: 0.4em;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 0 0.5em;
+}
+
+.document-actions button {
+    background: #379634;
+    color: white;
+    border: none;
+    padding: 0.4em 0.6em;
+    border-radius: 18px;
+    font-size: 0.8em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 0 0 auto;
+    min-width: 60px;
+    max-width: 80px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.document-actions button:hover {
+    background: #2d5a2a;
+    transform: translateY(-1px);
+}
+
+.document-actions .replace-btn {
+    background: #ff9800;
+}
+
+.document-actions .replace-btn:hover {
+    background: #e68900;
+}
+
+.document-actions .delete-btn {
+    background: #f44336;
+}
+
+.document-actions .delete-btn:hover {
+    background: #d32f2f;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+        padding: 1em;
+        gap: 1em;
+    }
+
+    .bento-card.quick-actions {
+        grid-column: span 1;
+    }
+
+    .bento-card.welcome h2 {
+        font-size: 2em;
+    }
+
+    .document-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1em !important;
+    }
+
+    .document-card {
+        max-width: 100% !important;
+        padding: 1em !important;
+    }
+
+    .document-actions {
+        gap: 0.3em !important;
+        padding: 0 !important;
+    }
+
+    .document-actions button {
+        font-size: 0.75em !important;
+        padding: 0.3em 0.5em !important;
+        min-width: 55px !important;
+        max-width: 70px !important;
+    }
+}
+

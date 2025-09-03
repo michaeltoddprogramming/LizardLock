@@ -1,0 +1,138 @@
+{% extends 'base/main.html' %}
+{% load static %}
+{% block head %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'confidential.css' %}">
+{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+
+    <div class="bento-card welcome">
+        <h2><i class="fas fa-lock"></i> Confidential Files</h2>
+        <p>Create and manage your encrypted confidential text files securely.</p>
+    </div>
+
+
+    {% if error %}
+    <div class="bento-card security">
+        <h3><i class="fas fa-exclamation-triangle"></i> Error</h3>
+        <div style="color: #d32f2f; padding: 1em; background: rgba(211, 47, 47, 0.1); border-radius: 10px;">
+            {{ error }}
+        </div>
+    </div>
+    {% endif %}
+
+
+    <div class="bento-card quick-actions">
+        <h3><i class="fas fa-plus"></i> Create New Confidential File</h3>
+        <form method="post" style="margin-top: 1em;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create">
+            <div style="display: grid; gap: 1em;">
+                <div>
+                    <label for="name" style="display: block; margin-bottom: 0.5em; font-weight: 600; color: #379634;">File Name:</label>
+                    <input type="text" name="name" id="name" required style="width: 100%; padding: 0.8em; border: 2px solid #379634; border-radius: 8px; background: rgba(255, 255, 255, 0.9);">
+                </div>
+                <div>
+                    <label for="content" style="display: block; margin-bottom: 0.5em; font-weight: 600; color: #379634;">Confidential Content:</label>
+                    <textarea name="content" id="content" rows="6" required style="width: 100%; padding: 0.8em; border: 2px solid #379634; border-radius: 8px; background: rgba(255, 255, 255, 0.9); resize: vertical;"></textarea>
+                </div>
+                <button type="submit" style="background: linear-gradient(135deg, #379634, #5cdb95); color: white; border: none; padding: 1em 2em; border-radius: 25px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                    <i class="fas fa-lock"></i> Create Secure File
+                </button>
+            </div>
+        </form>
+    </div>
+
+
+    <div class="bento-card stats">
+        <h3><i class="fas fa-list"></i> Your Confidential Files ({{ files|length }})</h3>
+        {% if files %}
+        <div class="confidential-grid">
+            {% for conf in files %}
+            <div class="confidential-card">
+                <div class="confidential-info">
+                    <h4>{{ conf.name }}</h4>
+                </div>
+
+                <div class="confidential-meta">
+                    <div><i class="fas fa-calendar"></i> {{ conf.uploaded_at|date:"M j, Y" }}</div>
+                    <div><i class="fas fa-weight"></i> {{ conf.size }} bytes</div>
+                </div>
+
+                <div class="confidential-actions">
+                    <form method="get" style="display: inline;">
+                        <input type="hidden" name="action" value="read">
+                        <input type="hidden" name="id" value="{{ conf.id }}">
+                        <button type="submit" class="view-btn">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </form>
+
+                    <button type="button" onclick="toggleEditForm('{{ conf.id }}')"
+                            class="edit-btn">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+
+                    <form method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="id" value="{{ conf.id }}">
+                        <button type="submit" onclick="return confirm('Are you sure you want to delete this confidential file?')"
+                                class="delete-btn">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </form>
+                </div>
+
+
+                <div id="edit-form-{{ conf.id }}" class="edit-form">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="write">
+                        <input type="hidden" name="id" value="{{ conf.id }}">
+                        <div style="display: grid; gap: 0.5em;">
+                            <label for="content_{{ conf.id }}">Update Content:</label>
+                            <textarea name="content" id="content_{{ conf.id }}" rows="4"></textarea>
+                            <div class="confidential-actions">
+                                <button type="submit" class="view-btn">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                                <button type="button" onclick="toggleEditForm('{{ conf.id }}')" class="cancel-btn">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div style="text-align: center; padding: 3em; color: #666; background: rgba(255, 255, 255, 0.5); border-radius: 15px; margin-top: 1em;">
+                <i class="fas fa-lock" style="font-size: 3em; color: #ccc; margin-bottom: 1em;"></i>
+                <p>No confidential files created yet.</p>
+                <p style="font-size: 0.9em;">Create your first secure file using the form above!</p>
+            </div>
+        {% endif %}
+    </div>
+
+
+    {% if view_content %}
+    <div class="bento-card security" style="margin-top: 2em;">
+        <h3><i class="fas fa-eye"></i> Viewing: {{ view_name }}</h3>
+        <div class="content-display">
+            <pre>{{ view_content }}</pre>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+
+function toggleEditForm(fileId) {
+    const form = document.getElementById('edit-form-' + fileId);
+    form.classList.toggle('show');
+}
+</script>
+{% endblock %}
