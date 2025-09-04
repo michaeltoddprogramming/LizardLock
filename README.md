@@ -1,29 +1,57 @@
-# Set up a virtual environment
+### 1. Create Virtual Environment
+```bash
 python -m venv venv
-source venv/bin/activate  # Use `venv\Scripts\activate` if on Windows...
+```
 
-# Install dependencies
+### 2. Activate Virtual Environment
+```bash
+# On Linux/macOS
+source venv/bin/activate
+
+# On Windows
+venv\Scripts\activate
+```
+
+### 3. Install Dependencies
+```bash
 pip install -r requirements.txt
+```
 
-# (Optional) Manually generate encryption key
+### 4. Generate Encryption Key (Optional) - This is done automatically
+```bash
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())" > confidential.key
+```
 
-# Run database migrations
+### 5. Run Database Migrations
+```bash
 python manage.py migrate
+```
 
-# Make your super user - to approve your initial admin
+### 6. Create Superuser
+```bash
 python manage.py createsuperuser
+```
 
-you will go to 127.0.0.1:8000/admin - and find your waiting approval object and approve it
+### 7. Use my initial admin script
+Run `python manage.py initial_admin_setup <yoursuperusername>`
+You can skip making a super user and this script will trigger superuser creation.
+Link up your authenticator app using the generated key.
+Now you can login as a admin in terms of roles and are also a superuser that can access the /admin panel.
 
-# Run the development server
+
+### 8. Start Development Server
+```bash
 python manage.py runserver
+```
 
+### Testing & Development
+```bash
 # Simulate anomalies for testing (spam failed logins, multiple IPs/users)
 python generate_anomalies.py
 
-# Encrypt existing MFA secrets (now done automatically)
+# Encrypt existing MFA secrets (automatically handled)
 python manage.py encrypt_mfa_secrets
 
 # Populate user fields with mock/filler data
 python manage.py populate_user_fields
+```
