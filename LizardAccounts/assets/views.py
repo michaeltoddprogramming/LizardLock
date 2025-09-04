@@ -484,9 +484,17 @@ def serve_image(request, image_id):
             raise Http404("Image file not found")
 
         try:
-            image.file.seek(0)
-            file_content = image.file.read()
-        except Exception:
+            # Use path to read file directly, avoiding Django's file handle issues on Windows
+            file_path = image.file.path
+            with open(file_path, 'rb') as f:
+                file_content = f.read()
+        except FileNotFoundError:
+            raise Http404("Image file not found on disk")
+        except PermissionError:
+            raise Http404("Cannot access image file")
+        except Exception as e:
+            import logging
+            logging.error(f"Error reading image file {image.name}: {str(e)}")
             raise Http404("Error reading image file")
 
         valid_image, _ = validate_file_signature(file_content[:1024], ['image/jpeg', 'image/png', 'image/gif'])
@@ -540,9 +548,16 @@ def serve_document(request, document_id):
             raise Http404("Document file not found")
 
         try:
-            document.file.seek(0)
-            file_content = document.file.read()
-        except Exception:
+            file_path = document.file.path
+            with open(file_path, 'rb') as f:
+                file_content = f.read()
+        except FileNotFoundError:
+            raise Http404("Document file not found on disk")
+        except PermissionError:
+            raise Http404("Cannot access document file")
+        except Exception as e:
+            import logging
+            logging.error(f"Error reading document file {document.name}: {str(e)}")
             raise Http404("Error reading document file")
 
         allowed_doc_types = [

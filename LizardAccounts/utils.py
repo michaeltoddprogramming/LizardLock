@@ -245,8 +245,10 @@ def validate_file(uploaded_file, allowed_types, max_size=5*1024*1024):
         return False, "Invalid file type based on content type."
 
     try:
+
+        current_pos = uploaded_file.tell()
         file_content = uploaded_file.read(1024)
-        uploaded_file.seek(0)
+        uploaded_file.seek(current_pos)
 
         valid, error = validate_file_signature(file_content, allowed_types)
         if not valid:
