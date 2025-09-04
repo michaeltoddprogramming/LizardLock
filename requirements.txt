@@ -1,0 +1,6 @@
+Django==5.2.5
+Pillow
+qrcode
+cryptography
+python-magic
+bcrypt

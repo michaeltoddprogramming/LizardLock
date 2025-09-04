@@ -16,6 +16,8 @@ from cryptography.fernet import Fernet
 from django.core.cache import cache
 from django.conf import settings
 from django.shortcuts import render
+from django.db import models
+from django.contrib.auth.models import User
 
 from .models import Lizards, log_asset_access
 
@@ -149,7 +151,7 @@ def get_client_ip(request):
         return '127.0.0.1'
 
 
-def is_rate_limited(request, identifier):
+def is_rate_limited(request, identifier, increment=True):
     ip = get_client_ip(request)
     key = f"rate_limit_{identifier}_{ip}"
 
@@ -157,7 +159,8 @@ def is_rate_limited(request, identifier):
     if attempts >= 5:
         return True
 
-    cache.set(key, attempts + 1, timeout=300)
+    if increment:
+        cache.set(key, attempts + 1, timeout=300)
     return False
 
 

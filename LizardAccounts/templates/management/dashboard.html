@@ -10,9 +10,7 @@
     <div class="bento-card welcome">
         <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
         <p>Welcome back, {{ user.username }}! Access your secure file management system with confidence.</p>
-        <div class="role-badge">{{ role|capfirst }}</div>
     </div>
-
 
     <div class="bento-card quick-actions">
         <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
@@ -65,7 +63,6 @@
         </div>
     </div>
 
-
     <div class="bento-card security">
         <h3><i class="fas fa-shield-alt"></i> Security Status</h3>
         {% if not mfa_verified %}
@@ -82,36 +79,6 @@
             </div>
         {% endif %}
     </div>
-
-
-    {% if role == 'admin' %}
-    <div class="bento-card stats">
-        <h3><i class="fas fa-chart-line"></i> System Overview</h3>
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-icon"><i class="fas fa-users"></i></div>
-                <div class="stat-label">Users</div>
-                <div class="stat-number">{{ user_count|default:"42" }}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-icon"><i class="fas fa-folder"></i></div>
-                <div class="stat-label">Files</div>
-                <div class="stat-number">{{ file_count|default:"156" }}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
-                <div class="stat-label">Security</div>
-                <div class="stat-number">100%</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-icon"><i class="fas fa-clock"></i></div>
-                <div class="stat-label">Uptime</div>
-                <div class="stat-number">99.9%</div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
 
     {% if recent_activity %}
     <div class="bento-card activity">

@@ -46,7 +46,7 @@ def manage_view(request):
         mfa_code = request.POST.get('mfa_code', '').strip()
         if not mfa_verified:
             if mfa_code and len(mfa_code) == 6 and mfa_code.isdigit():
-                if verify_mfa_code(lizard.mfa_secret, mfa_code):
+                if verify_mfa_code(lizard.get_mfa_secret(), mfa_code):
                     set_mfa_verified(request, lizard.user)
                     return redirect('manage')
                 else:

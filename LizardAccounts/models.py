@@ -10,9 +10,34 @@ class Lizards(models.Model):
         ('guest', 'Guest'),
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='guest')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='guest')
     is_approved = models.BooleanField(default=False)
-    mfa_secret = models.CharField(max_length=32, blank=True, null=True)
+    mfa_secret = models.CharField(max_length=255, blank=True, null=True)  # Increased size for encrypted data
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def set_mfa_secret(self, secret):
+        """Encrypt and store the MFA secret"""
+        from .utils import FERNET
+        import base64
+        encrypted_secret = FERNET.encrypt(secret.encode('utf-8'))
+        self.mfa_secret = base64.b64encode(encrypted_secret).decode('utf-8')
+
+    def get_mfa_secret(self):
+        """Decrypt and return the MFA secret"""
+        if not self.mfa_secret:
+            return None
+        from .utils import FERNET
+        import base64
+        try:
+            encrypted_data = base64.b64decode(self.mfa_secret.encode('utf-8'))
+            decrypted_secret = FERNET.decrypt(encrypted_data)
+            return decrypted_secret.decode('utf-8')
+        except Exception:
+            # If decryption fails, assume it's still plaintext
+            return self.mfa_secret
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role}"
 
 class AssetAccessLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

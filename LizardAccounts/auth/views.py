@@ -19,7 +19,9 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             secret = generate_mfa_secret()
-            Lizards.objects.create(user=user, mfa_secret=secret)
+            lizard = Lizards.objects.create(user=user)
+            lizard.set_mfa_secret(secret)
+            lizard.save()
             request.session['pending_user'] = user.username
             request.session['mfa_setup_required'] = True
             return redirect('two_factor')
@@ -35,7 +37,7 @@ def two_factor_view(request):
         return redirect('register')
 
     lizard = get_object_or_404(Lizards, user__username=username)
-    totp_uri = get_totp_uri(username, lizard.mfa_secret)
+    totp_uri = get_totp_uri(username, lizard.get_mfa_secret())
     qr_url = qr_svg(totp_uri)
     mfa_verified = is_mfa_verified(request, lizard.user)[0]
 
@@ -53,7 +55,7 @@ def two_factor_view(request):
     if request.method == 'POST':
         code = request.POST.get('code', '').strip()
         if code and len(code) == 6 and code.isdigit():
-            if verify_mfa_code(lizard.mfa_secret, code):
+            if verify_mfa_code(lizard.get_mfa_secret(), code):
                 set_mfa_verified(request, lizard.user)
                 request.session.pop('mfa_setup_required', None)
                 return redirect('two_factor')
@@ -81,7 +83,8 @@ def login_view(request):
             user = form.get_user()
             lizard, created = Lizards.objects.get_or_create(user=user)
             if created:
-                lizard.mfa_secret = generate_mfa_secret()
+                secret = generate_mfa_secret()
+                lizard.set_mfa_secret(secret)
                 lizard.save()
                 request.session['pending_user'] = user.username
                 request.session['mfa_setup_required'] = True
@@ -113,19 +116,21 @@ def verify_view(request):
         code = request.POST.get('code', '').strip()
         if code and len(code) == 6 and code.isdigit():
             lizard = get_object_or_404(Lizards, user__username=username)
-            if verify_mfa_code(lizard.mfa_secret, code):
+            if verify_mfa_code(lizard.get_mfa_secret(), code):
                 login(request, lizard.user)
                 set_mfa_verified(request, lizard.user)
                 request.session.pop('mfa_user', None)
                 from ..utils import get_client_ip, cache
-                cache.delete(f"mfa_attempts_mfa_login_{username}_{get_client_ip(request)}")
+                cache.delete(f"rate_limit_mfa_login_{username}_{get_client_ip(request)}")
                 return redirect('dashboard')
             else:
                 messages.error(request, "Invalid MFA code.")
         else:
             messages.error(request, "Please enter a valid 6-digit code.")
 
-    return render(request, 'auth/verify.html', {'rate_limited': False})
+    # Check rate limit status without incrementing for GET requests
+    rate_limited = is_rate_limited(request, f"mfa_login_{username}", increment=False)
+    return render(request, 'auth/verify.html', {'rate_limited': rate_limited})
 
 
 @require_POST
