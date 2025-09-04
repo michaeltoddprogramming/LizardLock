@@ -39,7 +39,6 @@ def two_factor_view(request):
 
     lizard = get_object_or_404(Lizards, user__username=username)
     
-    # Handle AJAX polling requests
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         from django.http import JsonResponse
         return JsonResponse({
