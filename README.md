@@ -1,2 +1,28 @@
-# LizardLock
-RBAC + MFA system with secure asset access and role management — built for COS 330 Practical 2 (with lizard power 🦎).
+# Set up a virtual environment
+python -m venv venv
+source venv/bin/activate  # Use `venv\Scripts\activate` if on Windows...
+
+# Install dependencies
+pip install -r requirements.txt
+
+# (Optional) Manually generate encryption key
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())" > confidential.key
+
+# Run database migrations
+python manage.py makemigrations
+python manage.py migrate
+
+# Collect static files
+python manage.py collectstatic --noinput
+
+# Run the development server
+python manage.py runserver
+
+# Simulate anomalies for testing (spam failed logins, multiple IPs/users)
+python generate_anomalies.py
+
+# Encrypt existing MFA secrets (now done automatically)
+python manage.py encrypt_mfa_secrets
+
+# Populate user fields with mock/filler data
+python manage.py populate_user_fields
