@@ -18,7 +18,6 @@ from ..utils import (
 
 
 def format_file_size(size_bytes):
-    """Convert bytes to human readable format"""
     if size_bytes == 0:
         return "0 B"
     elif size_bytes < 1024:

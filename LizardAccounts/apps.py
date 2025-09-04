@@ -7,7 +7,6 @@ class AccountsConfig(AppConfig):
     name = 'LizardAccounts'
 
     def ready(self):
-        # Import here to avoid AppRegistryNotReady
         from django.contrib.auth.models import User
         from .models import Lizards
         from .utils import generate_mfa_secret

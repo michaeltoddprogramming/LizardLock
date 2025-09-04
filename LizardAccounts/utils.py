@@ -29,7 +29,7 @@ def get_encryption_key():
             decoded_key = base64.b64decode(key)
             if len(decoded_key) != 32:
                 raise ValueError("Invalid key length")
-            return key  # Return the base64-encoded key as-is
+            return key
         except:
             pass
     key_file = os.path.join(settings.BASE_DIR, 'confidential.key')

@@ -43,7 +43,6 @@ class CustomUserCreationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Customize password fields
         self.fields['password1'].widget = forms.PasswordInput(attrs={
             'placeholder': 'Enter a strong password',
             'class': 'form-control'
@@ -53,7 +52,6 @@ class CustomUserCreationForm(UserCreationForm):
             'class': 'form-control'
         })
         
-        # Add labels for password fields
         self.fields['password1'].label = "Password"
         self.fields['password2'].label = "Confirm Password"
 
