@@ -9,11 +9,12 @@ pip install -r requirements.txt
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())" > confidential.key
 
 # Run database migrations
-python manage.py makemigrations
 python manage.py migrate
 
-# Collect static files
-python manage.py collectstatic --noinput
+# Make your super user - to approve your initial admin
+python manage.py createsuperuser
+
+you will go to 127.0.0.1:8000/admin - and find your waiting approval object and approve it
 
 # Run the development server
 python manage.py runserver
