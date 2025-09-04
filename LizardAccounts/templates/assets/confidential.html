@@ -23,6 +23,7 @@
     {% endif %}
 
 
+    {% if 'create' in user_permissions.confidential %}
     <div class="bento-card quick-actions">
         <h3><i class="fas fa-plus"></i> Create New Confidential File</h3>
         <form method="post" style="margin-top: 1em;">
@@ -43,6 +44,7 @@
             </div>
         </form>
     </div>
+    {% endif %}
 
 
     <div class="bento-card stats">
@@ -57,10 +59,11 @@
 
                 <div class="confidential-meta">
                     <div><i class="fas fa-calendar"></i> {{ conf.uploaded_at|date:"M j, Y" }}</div>
-                    <div><i class="fas fa-weight"></i> {{ conf.size }} bytes</div>
+                    <div><i class="fas fa-weight"></i> {{ conf.size }}</div>
                 </div>
 
                 <div class="confidential-actions">
+                    {% if 'read' in user_permissions.confidential %}
                     <form method="get" style="display: inline;">
                         <input type="hidden" name="action" value="read">
                         <input type="hidden" name="id" value="{{ conf.id }}">
@@ -68,24 +71,27 @@
                             <i class="fas fa-eye"></i> View
                         </button>
                     </form>
+                    {% endif %}
 
-                    <button type="button" onclick="toggleEditForm('{{ conf.id }}')"
-                            class="edit-btn">
+                    {% if 'write' in user_permissions.confidential %}
+                    <button type="button" onclick="toggleEditForm('{{ conf.id }}')" class="edit-btn">
                         <i class="fas fa-edit"></i> Edit
                     </button>
+                    {% endif %}
 
+                    {% if 'delete' in user_permissions.confidential %}
                     <form method="post" style="display: inline;">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="delete">
                         <input type="hidden" name="id" value="{{ conf.id }}">
-                        <button type="submit" onclick="return confirm('Are you sure you want to delete this confidential file?')"
-                                class="delete-btn">
+                        <button type="submit" onclick="return confirm('Are you sure you want to delete this confidential file?')" class="delete-btn">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                     </form>
+                    {% endif %}
                 </div>
 
-
+                {% if 'write' in user_permissions.confidential %}
                 <div id="edit-form-{{ conf.id }}" class="edit-form">
                     <form method="post">
                         {% csrf_token %}
@@ -105,6 +111,7 @@
                         </div>
                     </form>
                 </div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>

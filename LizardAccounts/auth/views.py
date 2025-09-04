@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -7,6 +7,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect
 
 from ..models import Lizards
+from ..forms import CustomUserCreationForm, CustomAuthenticationForm
 from ..utils import (
     generate_mfa_secret, get_totp_uri, qr_svg, verify_mfa_code,
     set_mfa_verified, is_mfa_verified, is_rate_limited, log_asset_access
@@ -15,7 +16,7 @@ from ..utils import (
 
 def register_view(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             secret = generate_mfa_secret()
@@ -26,7 +27,7 @@ def register_view(request):
             request.session['mfa_setup_required'] = True
             return redirect('two_factor')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, 'auth/register.html', {'form': form})
 
 
@@ -37,6 +38,15 @@ def two_factor_view(request):
         return redirect('register')
 
     lizard = get_object_or_404(Lizards, user__username=username)
+    
+    # Handle AJAX polling requests
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        from django.http import JsonResponse
+        return JsonResponse({
+            'approved': lizard.is_approved,
+            'mfa_verified': is_mfa_verified(request, lizard.user)[0]
+        })
+    
     totp_uri = get_totp_uri(username, lizard.get_mfa_secret())
     qr_url = qr_svg(totp_uri)
     mfa_verified = is_mfa_verified(request, lizard.user)[0]
@@ -78,7 +88,7 @@ def two_factor_view(request):
 @csrf_protect
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = CustomAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             lizard, created = Lizards.objects.get_or_create(user=user)
@@ -98,7 +108,7 @@ def login_view(request):
         else:
             messages.error(request, "Invalid credentials.")
     else:
-        form = AuthenticationForm()
+        form = CustomAuthenticationForm()
     return render(request, 'auth/login.html', {'form': form})
 
 
@@ -128,7 +138,6 @@ def verify_view(request):
         else:
             messages.error(request, "Please enter a valid 6-digit code.")
 
-    # Check rate limit status without incrementing for GET requests
     rate_limited = is_rate_limited(request, f"mfa_login_{username}", increment=False)
     return render(request, 'auth/verify.html', {'rate_limited': rate_limited})
 

@@ -6,7 +6,7 @@
 {% endblock %}
 {% block content %}
 <h2>Image Preview</h2>
-<p><b>{{ image.name }}</b> ({{ image.file.size }} bytes, uploaded {{ image.uploaded_at|date:"Y-m-d H:i" }})</p>
+<p><b>{{ image.name }}</b> ({{ image.file.size }}, uploaded {{ image.uploaded_at|date:"Y-m-d H:i" }})</p>
 <img src="{% url 'serve_image' image.id %}" alt="{{ image.name }}" style="max-width:600px;width:100%;height:auto;">
 <br>
 <a href="{% url 'serve_image' image.id %}" download="{{ image.name }}">

@@ -13,8 +13,8 @@
 
     {% if not mfa_verified %}
         <div class="bento-card login-form qr-card">
-            <h3><i class="fas fa-qrcode"></i> Step 1: Scan QR Code</h3>
-            <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)</p>
+            <h3><i class="fas fa-qrcode"></i> Step 1 - Scan QR Code</h3>
+            <p>Scan this QR code with your authenticator app</p>
             <div class="qr-code-container">
                 <img src="{{ qr_url }}" alt="TOTP QR Code" class="qr-code">
             </div>
@@ -181,16 +181,40 @@
     function pollApproval() {
         pollCount++;
         fetch(window.location.href, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
-            .then(response => response.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const status = doc.getElementById('approval-status').innerHTML;
-                document.getElementById('approval-status').innerHTML = status;
-                if (status.includes('approved')) {
-                    window.location.reload();
+            .then(response => response.json())
+            .then(data => {
+                if (data.approved) {
+                    document.getElementById('approval-status').innerHTML = `
+                        <div class="success-message">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>Account Approved!</h3>
+                            <p>Redirecting to login...</p>
+                        </div>
+                    `;
+
+                    setTimeout(() => {
+                        window.location.href = "{% url 'login' %}";
+                    }, 5000);
+                    
                 } else if (pollCount < maxPolls) {
                     if (pollCount % 6 === 0) pollInterval *= 2;
+                    setTimeout(pollApproval, pollInterval);
+                } else {
+                    document.getElementById('approval-status').innerHTML = `
+                        <div class="pending-message">
+                            <i class="fas fa-clock"></i>
+                            <h3>Still Waiting</h3>
+                            <p>Your account is still pending approval. Please check back later or contact an administrator.</p>
+                            <a href="{% url 'login' %}" class="login-btn">
+                                <i class="fas fa-sign-in-alt"></i> Try Login
+                            </a>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.log('Polling error:', error);
+                if (pollCount < maxPolls) {
                     setTimeout(pollApproval, pollInterval);
                 }
             });

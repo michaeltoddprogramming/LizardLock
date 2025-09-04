@@ -26,6 +26,51 @@
             </div>
             {% endif %}
 
+            <!-- Name fields in a row -->
+            <div class="form-row">
+                <div class="form-group half-width">
+                    <label for="{{ form.first_name.id_for_label }}">
+                        <i class="fas fa-user"></i> First Name
+                    </label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                    <div class="field-errors">
+                        {% for error in form.first_name.errors %}
+                        <span class="error-text">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group half-width">
+                    <label for="{{ form.last_name.id_for_label }}">
+                        <i class="fas fa-user"></i> Last Name
+                    </label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                    <div class="field-errors">
+                        {% for error in form.last_name.errors %}
+                        <span class="error-text">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">
+                    <i class="fas fa-envelope"></i> Email Address
+                </label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div class="field-errors">
+                    {% for error in form.email.errors %}
+                    <span class="error-text">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
             <div class="form-group">
                 <label for="{{ form.username.id_for_label }}">
                     <i class="fas fa-user"></i> Username
@@ -82,4 +127,48 @@
         </a>
     </div>
 </div>
+
+<style>
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.form-group.half-width {
+    flex: 1;
+    margin-bottom: 0;
+    min-width: 0;
+}
+
+.form-group.half-width input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .form-group.half-width {
+        margin-bottom: 1rem;
+    }
+}
+
+.register-form .form-group input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.auth-container .bento-card {
+    margin-bottom: 1.5rem;
+}
+
+.auth-container .bento-card:last-child {
+    margin-bottom: 0;
+}
+</style>
 {% endblock %}

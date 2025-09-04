@@ -17,6 +17,20 @@ from ..utils import (
 )
 
 
+def format_file_size(size_bytes):
+    """Convert bytes to human readable format"""
+    if size_bytes == 0:
+        return "0 B"
+    elif size_bytes < 1024:
+        return f"{size_bytes} B"
+    elif size_bytes < 1024**2:
+        return f"{size_bytes/1024:.1f} Kb"
+    elif size_bytes < 1024**3:
+        return f"{size_bytes/(1024**2):.1f} Mb"
+    else:
+        return f"{size_bytes/(1024**3):.1f} GB"
+
+
 @login_required
 @csrf_protect
 @require_mfa_for_sensitive_actions
@@ -46,7 +60,7 @@ def images_view(request):
                 'id': img.id,
                 'name': img.name,
                 'uploaded_at': img.uploaded_at,
-                'size': img.file.size if img.file else 0,
+                'size': format_file_size(img.file.size if img.file else 0),
             } for img in images]
 
         elif action == 'read':
@@ -96,9 +110,9 @@ def images_view(request):
                     if not valid:
                         context['error'] = error
                     else:
-
                         image.file = uploaded_file
-                        image.save()  # Django will delete old file automatically
+                        image.save()
+                        
                         try:
                             log_asset_access(request.user, 'images', image.name, 'write', request, True, is_mfa_verified(request, request.user)[0])
                         except Exception as log_error:
@@ -147,7 +161,7 @@ def images_view(request):
             'id': img.id,
             'name': img.name,
             'uploaded_at': img.uploaded_at,
-            'size': img.file.size if img.file else 0
+            'size': format_file_size(img.file.size if img.file else 0)
         } for img in images]
 
     context['user_permissions'] = user_permissions
@@ -162,7 +176,7 @@ def documents_view(request):
     context = {'files': [], 'error': None}
 
     try:
-        lizard = request.user.lizards  # Use related name if set, else adjust to user.role
+        lizard = request.user.lizards
         user_permissions = ACCESS_MATRIX.get(lizard.role, {})
     except:
         user_permissions = {}
@@ -179,12 +193,12 @@ def documents_view(request):
 
     try:
         if action == 'list':
-            documents = DocumentAsset.objects.all()  # No owner filter
+            documents = DocumentAsset.objects.all()
             context['files'] = [{
                 'id': doc.id,
                 'name': doc.name,
                 'uploaded_at': doc.uploaded_at,
-                'size': doc.file.size if doc.file else 0
+                'size': format_file_size(doc.file.size if doc.file else 0)
             } for doc in documents]
 
         elif action == 'read':
@@ -213,7 +227,7 @@ def documents_view(request):
                         context['error'] = error
                     else:
                         with transaction.atomic():
-                            DocumentAsset.objects.create(  # Removed owner
+                            DocumentAsset.objects.create(
                                 file=uploaded_file,
                                 name=name[:255]
                             )
@@ -241,11 +255,9 @@ def documents_view(request):
                     if not valid:
                         context['error'] = error
                     else:
-                        old_file = document.file
                         document.file = uploaded_file
                         document.save()
-                        if old_file:
-                            old_file.delete()
+                        
                         try:
                             log_asset_access(request.user, 'documents', document.name, 'write', request, True, is_mfa_verified(request, request.user)[0])
                         except Exception as log_error:
@@ -290,7 +302,7 @@ def documents_view(request):
             'id': doc.id,
             'name': doc.name,
             'uploaded_at': doc.uploaded_at,
-            'size': doc.file.size if doc.file else 0
+            'size': format_file_size(doc.file.size if doc.file else 0)
         } for doc in documents]
 
     context['user_permissions'] = user_permissions
@@ -304,6 +316,12 @@ def confidential_view(request):
     action = request.POST.get('action') or request.GET.get('action', 'list')
     context = {'files': [], 'error': None, 'view_content': None, 'view_name': None}
 
+    try:
+        lizard = request.user.lizards
+        user_permissions = ACCESS_MATRIX.get(lizard.role, {})
+    except:
+        user_permissions = {}
+
     if not check_access(request.user, 'confidential', action):
         mfa_ok, _ = is_mfa_verified(request, request.user)
         try:
@@ -311,6 +329,7 @@ def confidential_view(request):
         except Exception as log_error:
             import logging
             logging.error(f"Failed to log denied confidential access: {str(log_error)}")
+        context['user_permissions'] = user_permissions
         return render(request, 'base/forbidden.html', context)
 
     mfa_ok, _ = is_mfa_verified(request, request.user)
@@ -320,12 +339,12 @@ def confidential_view(request):
 
     try:
         if action == 'list':
-            confidential_files = ConfidentialAsset.objects.all()  # No owner filter
+            confidential_files = ConfidentialAsset.objects.all()
             context['files'] = [{
                 'id': conf.id,
                 'name': conf.name,
                 'uploaded_at': conf.uploaded_at,
-                'size': conf.encrypted_file.size if conf.encrypted_file else 0
+                'size': format_file_size(conf.encrypted_file.size if conf.encrypted_file else 0)
             } for conf in confidential_files]
 
         elif action == 'read':
@@ -363,7 +382,7 @@ def confidential_view(request):
                     encrypted_content = FERNET.encrypt(content.encode('utf-8'))
                     encrypted_file = ContentFile(encrypted_content, name=f"{name}.enc")
 
-                    ConfidentialAsset.objects.create(  # Removed owner
+                    ConfidentialAsset.objects.create(
                         encrypted_file=encrypted_file,
                         name=name,
                         encryption_metadata='Fernet AES-128'
@@ -434,9 +453,10 @@ def confidential_view(request):
         'id': conf.id,
         'name': conf.name,
         'uploaded_at': conf.uploaded_at,
-        'size': conf.encrypted_file.size if conf.encrypted_file else 0
+        'size': format_file_size(conf.encrypted_file.size if conf.encrypted_file else 0)
     } for conf in confidential_files]
 
+    context['user_permissions'] = user_permissions
     return render(request, 'assets/confidential.html', context)
 
 

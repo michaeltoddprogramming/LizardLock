@@ -1,6 +1,9 @@
+{% load static %}
 <div class="navbar">
-    <h1>LizardLock</h1>
-    <div class="navbar-subtitle">Welcome to the scales of security</div>
+    <img src="{% static 'MTWebSolutions.png' %}" alt="LizardLock Logo" 
+         style="height: 10em; vertical-align: middle; margin-right: 0.5em; filter: brightness(0) invert(1); margin-bottom: 3em">
+    {% comment %} <h1>LizardLock</h1> {% endcomment %}
+    {% comment %} <div class="navbar-subtitle">Welcome to the scales of security</div> {% endcomment %}
     <nav class="navbar-links">
         {% if user.is_authenticated %}
             <span><i class="fas fa-user"></i> Hi, {{ user.username }}!</span>
